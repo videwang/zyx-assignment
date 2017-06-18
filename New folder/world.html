@@ -44,6 +44,7 @@
         createjs.Ticker.setFPS(60);
         start();  
         window.onkeydown = movePadel;
+        window.onkeyup = keyUp;
     }
     function handleTick(e) {
         stage.update();
@@ -157,7 +158,6 @@
                 }
                 setColor(selfPositionXNew, selfPositionY);
                 selfPositionX = selfPositionX - 1;
-                console.log(selfPositionX);
                 break;
             case ARROW_KEY_RIGHT:
                 selfPositionXNew = selfPositionX + 1;
@@ -196,6 +196,18 @@
                 selfPositionY = selfPositionY - 1;
                 break;
         }
+
+    }
+
+    function keyUp(){
+        if(world[selfPositionY][selfPositionX] == 3){
+            message();
+        }
+    }
+
+    function message(){
+        alert('成功，再来一次！');
+        location.reload();
     }
 
 </script>
