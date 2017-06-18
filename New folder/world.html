@@ -13,6 +13,13 @@
 </body>
 
 <script>
+    const ARROW_KEY_LEFT = 37;
+    const ARROW_KEY_RIGHT = 39;
+    const ARROW_KEY_UP = 38;
+    const ARROW_KEY_DOWN = 40;
+
+    var selfPositionX;
+    var selfPositionY;
     var stage;
 	const E=0,W=1,P=2,G=3; //Empty,
 	const objects=['Empty','Wall','Player','Goal'];
@@ -25,15 +32,18 @@
 		[W,0,0,0,0,W,0,0,W,0,W],
 		[W,0,0,0,0,W,0,0,W,0,W],
 		[W,0,0,0,0,W,0,0,W,0,W],
-		[W,W,0,W,0,W,0,P,0,0,W]
+		[W,W,0,W,0,W,0,0,P,0,W]
 	];
 	
+    const xLength = world[0].length;
+    const yLength = world.length;
 	
     function init() {
         stage = new createjs.Stage(document.getElementById('canvas'));
         createjs.Ticker.addEventListener("tick", handleTick);
         createjs.Ticker.setFPS(60);
-        start();
+        start();  
+        window.onkeydown = movePadel;
     }
     function handleTick(e) {
         stage.update();
@@ -59,17 +69,21 @@
 		
 		var x=20;
 		var y=300;
-		world.forEach( er => 
+		world.forEach( (er, iy) => 
 			{
 				console.log(er);
 				// er is array of a row
-				er.forEach( ec =>
+				er.forEach( (ec, ix) =>
 					{ //ec is the element in the world
 						console.log(ec);
 						fillColor=colors[ec];
 						var rect=getRectangle('black',fillColor,x,y,50,50);
 						stage.addChild(rect);					
 						x += 50;
+                        if(ec==2){
+                            selfPositionY = iy;
+                            selfPositionX = ix;
+                        }
 					}
 				
 				);
@@ -120,6 +134,68 @@
         <!-- roundedRectangle.x = roundedRectangle.y = 150; -->
         <!-- stage.addChild(roundedRectangle); -->
 
+    }
+
+    function setColor(newX, newY){
+        var a = getRectangle('black','white',20+50*selfPositionX,300+50*selfPositionY,50,50);
+        stage.addChild(a); 
+        var a = getRectangle('black','blue',20+50*newX,300+50*newY,50,50);
+        stage.addChild(a); 
+    }
+
+    function movePadel(e) {
+        e = !e ? window.event : e;
+        console.log(world.length);
+        switch (e.keyCode) {
+            case ARROW_KEY_LEFT:
+                selfPositionXNew = selfPositionX - 1;
+                if(selfPositionXNew<0){
+                    return ;
+                }
+                if(world[selfPositionY][selfPositionXNew]==1){
+                    return ;
+                }
+                setColor(selfPositionXNew, selfPositionY);
+                selfPositionX = selfPositionX - 1;
+                console.log(selfPositionX);
+                break;
+            case ARROW_KEY_RIGHT:
+                selfPositionXNew = selfPositionX + 1;
+                //console.log(world.length);
+                if(selfPositionXNew>(xLength-1)){
+                    return ;
+                }
+                if(world[selfPositionY][selfPositionXNew]==1){
+                    return ;
+                }
+                setColor(selfPositionXNew, selfPositionY);
+                selfPositionX = selfPositionX + 1;
+                break;
+            case ARROW_KEY_DOWN:
+                selfPositionYNew = selfPositionY + 1;
+                //console.log(world.length);
+                if(selfPositionYNew>(yLength-1)){
+                    return ;
+                }
+                if(world[selfPositionYNew][selfPositionX]==1){
+                    return ;
+                }
+                setColor(selfPositionX, selfPositionYNew);
+                selfPositionY = selfPositionY + 1;
+                break;
+            case ARROW_KEY_UP:
+                selfPositionYNew = selfPositionY - 1;
+                //console.log(world.length);
+                if(selfPositionYNew<0){
+                    return ;
+                }
+                if(world[selfPositionYNew][selfPositionX]==1){
+                    return ;
+                }
+                setColor(selfPositionX, selfPositionYNew);
+                selfPositionY = selfPositionY - 1;
+                break;
+        }
     }
 
 </script>
