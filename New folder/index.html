@@ -14,14 +14,16 @@
 
 <script>
     var stage;
+    var btn;
     function init() {
         stage = new createjs.Stage(document.getElementById('canvas'));
         stage.enableMouseOver();
         createjs.Ticker.addEventListener("tick", stage);
         addButtons();
+        btn.addEventListener("click", function(){ window.location="world.html"; });
     }
     function addButtons() {
-        var btn = new ui.SimpleButton('Start Game');
+        btn = new ui.SimpleButton('Start Game');
         
         //btn.setButton({color:'white', fontSize:50, upColor:'green', overColor:'#ff69b4'});
         btn.setColor('white');
@@ -32,6 +34,7 @@
         
         stage.addChild(btn);
     }
+
 
 </script>
 </html>
