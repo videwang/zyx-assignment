@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <script src="../lib/easeljs-0.7.1.min.js"></script>
+    <script src="../lib/tweenjs-0.5.1.min.js"></script>
+</head>
+
+<body onload="init()" style="margin: 20px">
+
+<canvas id="canvas" width="800" height="700" style="border: black solid 1px"></canvas>
+
+</body>
+
+<script type="text/javascript">
+var point = [];		// black dot array;
+var redPlayer = {	// player object
+	name : 'red',
+	disk : []
+};
+var bluePlayer = {	// player object
+	name : 'blue',
+	disk : []
+};
+const marginLeft = 250;
+const marginTop = 200;
+const l = 150;
+var whosTurn = 'red';	// red player goes first
+var steps = [];			// store player's play step
+
+for(i = 1; i <= 9; i++){
+	var row = Math.ceil(i / 3);
+	var col = i % 3;
+	if(!col){ col = 3;}
+	point[i] = {
+		name : i,
+		positionX : (col - 1) * l + marginLeft,
+		positionY : (row - 1) * l + marginTop,
+
+	}
+}
+
+console.log(point);
+
+function init(){
+	stage = new createjs.Stage(document.getElementById('canvas'));
+    createjs.Ticker.addEventListener("tick", handleTick);
+    createjs.Ticker.setFPS(60);
+    start();
+}
+
+function handleTick(e){
+    stage.update();
+}
+
+function start(){
+	drawnBoard();
+	initPlayer();
+	positDisks();
+}
+
+// draw circle
+function circle(color, left, top, diskSize){
+    var circle = new createjs.Shape();
+    circle.graphics.beginFill(color).drawCircle(left,top,diskSize);
+    return circle;
+}
+
+// draw board
+function drawnBoard(){
+	var s = new createjs.Shape(); 
+    s.graphics.s("black").ss(1).mt(point[1].positionX, point[1].positionY).lt(point[9].positionX, point[9].positionY).es();
+    s.graphics.s("black").ss(1).mt(point[3].positionX, point[3].positionY).lt(point[7].positionX, point[7].positionY).es();
+    s.graphics.s("black").ss(1).mt(point[1].positionX, point[1].positionY).lt(point[3].positionX, point[3].positionY).es();
+    s.graphics.s("black").ss(1).mt(point[3].positionX, point[3].positionY).lt(point[9].positionX, point[9].positionY).es();
+    s.graphics.s("black").ss(1).mt(point[9].positionX, point[9].positionY).lt(point[7].positionX, point[7].positionY).es();
+    s.graphics.s("black").ss(1).mt(point[7].positionX, point[7].positionY).lt(point[1].positionX, point[1].positionY).es();
+    s.graphics.s("black").ss(1).mt(point[2].positionX, point[2].positionY).lt(point[8].positionX, point[8].positionY).es();
+    s.graphics.s("black").ss(1).mt(point[4].positionX, point[4].positionY).lt(point[6].positionX, point[6].positionY).es();
+    stage.addChild(s);
+    // draw point
+    point.forEach((el, i) => {
+    	stage.addChild(circle('black', el.positionX, el.positionY, 5));
+    });
+}
+
+// init player object , init player's disk
+function initPlayer(){
+	for(i = 1; i <= 3; i++){
+		redPlayer.disk[i] = circle('red', 0, 0, 30);
+		redPlayer.disk[i].name = 'r' + i;
+		bluePlayer.disk[i] = circle('blue', 0, 0, 30);
+		bluePlayer.disk[i].name = 'b' + i;
+	}
+}
+
+// init disks position, and set listener on each disk
+function positDisks(){
+	redPlayer.disk.forEach((el, i)=> {
+        redPlayer.disk[i].addEventListener('mousedown',function(e){
+        	if(checkTurn(redPlayer)==false){ return ;}
+            stage.addEventListener('stagemousemove',function(e){
+                redPlayer.disk[i].x = stage.mouseX;
+                redPlayer.disk[i].y = stage.mouseY;
+                redPlayer.disk[i].point = getPoint(redPlayer.disk[i]);
+            });
+            stage.addEventListener('stagemouseup',function(e){
+                e.target.removeAllEventListeners();
+                if(checkDiskPosition(el)){
+                	updateOriginalPosition(el);
+                	diskAdjust(el);
+                	var res = checkForWin(redPlayer);
+                	if(res != false){
+                		alert(res.player+' player win!');
+                	}
+                	changeTurn();
+                }
+            });
+        });
+        redPlayer.disk[i].x = 120;
+        redPlayer.disk[i].y = 200 + i * 90;
+        redPlayer.disk[i].originalX = 120;
+        redPlayer.disk[i].originalY = 200 + i * 90;
+        stage.addChild(redPlayer.disk[i]);
+    });
+    bluePlayer.disk.forEach((el, i)=> {
+        bluePlayer.disk[i].addEventListener('mousedown',function(e){
+        	if(checkTurn(bluePlayer)==false){ return ;}
+            stage.addEventListener('stagemousemove',function(e){
+                bluePlayer.disk[i].x = stage.mouseX;
+                bluePlayer.disk[i].y = stage.mouseY;
+                bluePlayer.disk[i].point = getPoint(bluePlayer.disk[i]);
+            });
+            stage.addEventListener('stagemouseup',function(e){
+                e.target.removeAllEventListeners();
+                if(checkDiskPosition(el)){
+                	updateOriginalPosition(el);
+                	diskAdjust(el);
+                	var res = checkForWin(bluePlayer);
+                	if(res != false){
+                		alert(res.player+' player win!');
+                	}
+                	changeTurn();
+                }
+            });
+        });
+        bluePlayer.disk[i].x = 120 + 250 +300;
+        bluePlayer.disk[i].y = 200 + i * 90;
+        bluePlayer.disk[i].originalX = 120 + 250 +300;
+        bluePlayer.disk[i].originalY = 200 + i * 90;
+        stage.addChild(bluePlayer.disk[i]);
+    });
+}
+
+// before moving the disk, check if is the player's turn
+function checkTurn(player){
+	if(player.name != whosTurn){
+		alert('Sorry! It\'s not your turn.');
+		return false;
+	}
+	return true;
+}
+
+// exchange player turn
+function changeTurn(){
+	if(whosTurn == 'red'){
+		whosTurn = 'blue';
+	}else {
+		whosTurn = 'red';
+	}
+}
+
+// store player's step
+function storeSteps(disk, i){
+	steps[i] = {
+		disk : disk,
+		point : i
+	};
+}
+
+// check if disk's position is correct (over the black dot)
+function checkDiskPosition(disk){
+	var r = false;
+	steps.forEach((el) => {
+		if(disk.point == el.point){
+			diskGoBack(disk);
+			r = false;
+		}
+	});
+	point.forEach((el, i) => {
+		if((el.positionX + 30) > disk.x && disk.x > (el.positionX - 30) && (el.positionY + 30) > disk.y && disk.y > (el.positionY - 30)){
+			storeSteps(disk, i);
+			r = true;
+		}
+	});
+	return r;
+}
+
+function getPoint(disk){
+	var r = false;
+	point.forEach((el, i) => {
+		if((el.positionX + 30) > disk.x && disk.x > (el.positionX - 30) && (el.positionY + 30) > disk.y && disk.y > (el.positionY - 30)){
+			r = i;
+		}
+	});
+	return r;
+}
+
+function updateOriginalPosition(disk){
+	disk.originalX = disk.x;
+	disk.originalY = disk.y;
+}
+
+function diskGoBack(disk){
+	disk.x = disk.originalX;
+	disk.y = disk.originalY;
+}
+
+function diskAdjust(disk){
+	disk.x = point[disk.point].positionX;
+	disk.y = point[disk.point].positionY;
+}
+
+function checkForWin(player){
+	var win = false;
+	win = win || checkForWinByRows(player);
+	win = win || checkForWinBycolumns(player);
+	win = win || checkForWinByDiagonals(player);
+	return win;
+}
+
+function checkForWinByRows(player){
+	var p = [];
+	player.disk.forEach((el, i) => {
+		p[i] = el.point;
+	});
+	if(p.indexOf(1)!=-1 && p.indexOf(2)!=-1 && p.indexOf(3)!=-1){
+		return { player : player.name, win : true };
+	}
+	if(p.indexOf(4)!=-1 && p.indexOf(5)!=-1 && p.indexOf(6)!=-1){
+		return { player : player.name, win : true };
+	}
+	if(p.indexOf(7)!=-1 && p.indexOf(7)!=-1 && p.indexOf(9)!=-1){
+		return { player : player.name, win : true };
+	}
+	return false;
+}
+
+function checkForWinBycolumns(player){
+	var p = [];
+	player.disk.forEach((el, i) => {
+		p[i] = el.point;
+	});
+	if(p.indexOf(1)!=-1 && p.indexOf(4)!=-1 && p.indexOf(7)!=-1){
+		return { player : player.name, win : true };
+	}
+	if(p.indexOf(2)!=-1 && p.indexOf(5)!=-1 && p.indexOf(8)!=-1){
+		return { player : player.name, win : true };
+	}
+	if(p.indexOf(3)!=-1 && p.indexOf(6)!=-1 && p.indexOf(9)!=-1){
+		return { player : player.name, win : true };
+	}
+	return false;
+}
+
+function checkForWinByDiagonals(player){
+	var p = [];
+	player.disk.forEach((el, i) => {
+		p[i] = el.point;
+	});
+	if(p.indexOf(1)!=-1 && p.indexOf(5)!=-1 && p.indexOf(9)!=-1){
+		return { player : player.name, win : true };
+	}
+	if(p.indexOf(7)!=-1 && p.indexOf(5)!=-1 && p.indexOf(3)!=-1){
+		return { player : player.name, win : true };
+	}
+	return false;
+}
+</script>
+
+</html>
