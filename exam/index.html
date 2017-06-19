@@ -90,6 +90,7 @@
                     redPlayer[i].y = stage.mouseY;
                 });
                 stage.addEventListener('stagemouseup',function(e){
+                    recordDiskPosition(bluePlayer[i], 'red');
                     e.target.removeAllEventListeners();
                 });
             });
@@ -104,7 +105,7 @@
                     bluePlayer[i].y = stage.mouseY;
                 });
                 stage.addEventListener('stagemouseup',function(e){
-                    recordDiskPosition(bluePlayer[i]);
+                    recordDiskPosition(bluePlayer[i], 'blue');
                     e.target.removeAllEventListeners();
                 });
             });
@@ -125,11 +126,16 @@
         }
     }
 
-    function recordDiskPosition(disk, color = red){
+    function recordDiskPosition(disk, color = 'red'){
         board.forEach((el, i)=> {
             el.forEach((ell, ii)=> {
                 if(disk.x > (ell['x']-diskSize ) && disk.x < (ell['x']+diskSize ) && disk.y > (ell['y']-diskSize ) && disk.y < (ell['y']+diskSize )){
-                    
+                    if(color == 'red'){
+                        redPlayerPosition[i] = i+''+ii;
+                    }
+                    if(color == 'blue'){
+                        bluePlayerPosition[i] = i+''+ii;
+                    }
                 }
             })
         })
