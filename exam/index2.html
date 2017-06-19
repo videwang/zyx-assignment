@@ -22,11 +22,13 @@ var bluePlayer = {	// player object
 	name : 'blue',
 	disk : []
 };
+var done = false;
 const marginLeft = 250;
 const marginTop = 200;
 const l = 150;
 var whosTurn = 'red';	// red player goes first
 var steps = [];			// store player's play step
+var roundCounter = 1;
 
 for(i = 1; i <= 9; i++){
 	var row = Math.ceil(i / 3);
@@ -39,6 +41,11 @@ for(i = 1; i <= 9; i++){
 
 	}
 }
+
+messageTxt = new createjs.Text('', '18px Times', '#333');
+messageTxt.textAlign = 'center';
+messageTxt.y = 10;
+messageTxt.x = canvas.width / 2;
 
 console.log(point);
 
@@ -98,6 +105,7 @@ function initPlayer(){
 function positDisks(){
 	redPlayer.disk.forEach((el, i)=> {
         redPlayer.disk[i].addEventListener('mousedown',function(e){
+        	if(done == true) { return; }
         	if(checkTurn(redPlayer)==false){ return ;}
             stage.addEventListener('stagemousemove',function(e){
                 redPlayer.disk[i].x = stage.mouseX;
@@ -109,11 +117,15 @@ function positDisks(){
                 if(checkDiskPosition(el)){
                 	updateOriginalPosition(el);
                 	diskAdjust(el);
-                	var res = checkForWin(redPlayer);
-                	if(res != false){
-                		alert(res.player+' player win!');
-                	}
                 	changeTurn();
+                	if(checkForWin(redPlayer)){
+                		message('You Win ! Press Spacebar to start a new game.');
+                		window.onkeydown = reStart;
+                		done = true;
+                	}else if(noDisk()){
+						roundCounter++;
+                		newGame();
+                	}
                 }
             });
         });
@@ -125,6 +137,7 @@ function positDisks(){
     });
     bluePlayer.disk.forEach((el, i)=> {
         bluePlayer.disk[i].addEventListener('mousedown',function(e){
+        	if(done == true) { return; }
         	if(checkTurn(bluePlayer)==false){ return ;}
             stage.addEventListener('stagemousemove',function(e){
                 bluePlayer.disk[i].x = stage.mouseX;
@@ -136,11 +149,15 @@ function positDisks(){
                 if(checkDiskPosition(el)){
                 	updateOriginalPosition(el);
                 	diskAdjust(el);
-                	var res = checkForWin(bluePlayer);
-                	if(res != false){
-                		alert(res.player+' player win!');
-                	}
                 	changeTurn();
+                	if(checkForWin(bluePlayer)){
+                		message('You Win ! Press Spacebar to start a new game.');
+                		window.onkeydown = reStart;
+                		done = true;
+                	}else if(noDisk()){
+						roundCounter++;
+                		newGame();
+                	}
                 }
             });
         });
@@ -155,7 +172,8 @@ function positDisks(){
 // before moving the disk, check if is the player's turn
 function checkTurn(player){
 	if(player.name != whosTurn){
-		alert('Sorry! It\'s not your turn.');
+		message('Sorry ! It\'s not your turn.');
+		setTimeout(function() { messageTxt.visible = false; }, 2000);
 		return false;
 	}
 	return true;
@@ -240,7 +258,7 @@ function checkForWinByRows(player){
 	if(p.indexOf(4)!=-1 && p.indexOf(5)!=-1 && p.indexOf(6)!=-1){
 		return { player : player.name, win : true };
 	}
-	if(p.indexOf(7)!=-1 && p.indexOf(7)!=-1 && p.indexOf(9)!=-1){
+	if(p.indexOf(7)!=-1 && p.indexOf(8)!=-1 && p.indexOf(9)!=-1){
 		return { player : player.name, win : true };
 	}
 	return false;
@@ -275,6 +293,56 @@ function checkForWinByDiagonals(player){
 		return { player : player.name, win : true };
 	}
 	return false;
+}
+
+function noDisk(){
+	var res = true;
+	redPlayer.disk.forEach((el, i) => {
+		if(el.point==undefined){
+			res = false;
+		}
+	});
+	bluePlayer.disk.forEach((el, i) => {
+		if(el.point==undefined){
+			res = false;
+		}
+	});
+	return res;
+}
+
+function newGame(){
+	redPlayer = {	// player object
+		name : 'red',
+		disk : []
+	};
+	bluePlayer = {	// player object
+		name : 'blue',
+		disk : []
+	};
+	whosTurn = 'red';
+	steps = [];
+	done = false;
+	init();	
+	if(roundCounter == 10){
+		message('Tied game!');
+		setTimeout(function() { messageTxt.visible = false; }, 2000);
+		roundCounter = 1;
+	}
+}
+
+function message(text){
+	messageTxt.visible = true;
+	messageTxt.text = text;
+    stage.addChild(messageTxt);
+}
+
+function reStart(e){
+	e = !e ? window.event : e;
+	switch (e.keyCode) {
+        case 32:
+            newGame();
+            break;
+    }
 }
 </script>
 
