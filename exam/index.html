@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <script src="../lib/easeljs-0.7.1.min.js"></script>
+    <script src="../lib/tweenjs-0.5.1.min.js"></script>
+</head>
+
+<body onload="init()" style="margin: 20px">
+
+<canvas id="canvas" width="800" height="700" style="border: black solid 1px"></canvas>
+
+</body>
+
+<script>
+    var stage;
+    const red = 'red';
+    const blue = 'blue';
+    const diskSize = 30;
+    const diskQ = 3;
+    const paddingTop = 200;
+    const paddingLeft = 250;
+    const rectangleSize = 150;
+    var redPlayer = [];
+    var bluePlayer = [];
+    var roundCounter = 1;
+    var board = [];
+    var redPlayerPosition = [];
+    var bluePlayerPosition = [];
+
+    function init(){
+        stage = new createjs.Stage(document.getElementById('canvas'));
+        createjs.Ticker.addEventListener("tick", handleTick);
+        createjs.Ticker.setFPS(60);
+        start();
+    }
+    function handleTick(e){
+        stage.update();
+    }
+    function start(){
+        drawGameBoard();
+        getBoardPositionInfo();
+        drawPoint();
+        playerDisks();
+        positDisks();
+    }
+
+    // make a disk with custom color
+    function disk(color, left, top, diskSize){
+        var circle = new createjs.Shape();
+        circle.graphics.beginFill(color).drawCircle(left,top,diskSize);
+        circle.x = stage.canvas.width / 2;
+        circle.y = stage.canvas.height / 2;
+        return circle;
+    }
+
+    function drawGameBoard(){
+        console.log('show board' );
+        for (var i = 0; i < diskQ-1; i++) {
+            for (var ii = 0; ii < diskQ-1; ii++) {
+                drawRectangle(i,ii);
+            }
+        }
+    }
+
+    function drawRectangle(y, x){
+        var s = new createjs.Shape(); 
+        s.graphics.beginFill("#fff");  
+        s.graphics.beginStroke("black");  
+        s.graphics.drawRect(paddingLeft+x*rectangleSize,paddingTop+y*rectangleSize,rectangleSize,rectangleSize);  
+        s.graphics.endFill();
+        stage.addChild(s);
+    }
+
+    function playerDisks(){
+        for(i = 0; i<diskQ; i++){
+            redPlayer[i] = disk(red, 0, 0, diskSize);
+        }
+        for(i = 0; i<diskQ; i++){
+            bluePlayer[i] = disk(blue, 0, 0, diskSize);
+        }
+    }
+
+    function positDisks(){
+        redPlayer.forEach((el, i)=> {
+            redPlayer[i].addEventListener('mousedown',function(e){
+                stage.addEventListener('stagemousemove',function(e){
+                    redPlayer[i].x = stage.mouseX;
+                    redPlayer[i].y = stage.mouseY;
+                });
+                stage.addEventListener('stagemouseup',function(e){
+                    e.target.removeAllEventListeners();
+                });
+            });
+            redPlayer[i].x = 100;
+            redPlayer[i].y = 250 + i * 100;
+            stage.addChild(redPlayer[i]);
+        });
+        bluePlayer.forEach((el, i)=> {
+            bluePlayer[i].addEventListener('mousedown',function(e){
+                stage.addEventListener('stagemousemove',function(e){
+                    bluePlayer[i].x = stage.mouseX;
+                    bluePlayer[i].y = stage.mouseY;
+                });
+                stage.addEventListener('stagemouseup',function(e){
+                    recordDiskPosition(bluePlayer[i]);
+                    e.target.removeAllEventListeners();
+                });
+            });
+            bluePlayer[i].x = 700;
+            bluePlayer[i].y = 250 + i * 100;
+            stage.addChild(bluePlayer[i]);
+        });
+    }
+
+    function getBoardPositionInfo(){
+        for(i = 0; i < diskQ; i++){
+            board[i] = new Array();
+            for(ii = 0; ii < diskQ; ii++){
+                board[i][ii] = new Array();
+                board[i][ii]['x'] = paddingLeft + rectangleSize*ii;
+                board[i][ii]['y'] = paddingTop + rectangleSize*i;
+            }
+        }
+    }
+
+    function recordDiskPosition(disk, color = red){
+        board.forEach((el, i)=> {
+            el.forEach((ell, ii)=> {
+                if(disk.x > (ell['x']-diskSize ) && disk.x < (ell['x']+diskSize ) && disk.y > (ell['y']-diskSize ) && disk.y < (ell['y']+diskSize )){
+                    
+                }
+            })
+        })
+    }
+
+    function drawPoint(){
+        board.forEach((el, i)=> {
+            el.forEach((ell, ii)=> {
+                point = disk('black', ell['x']-400, ell['y']-350, 5);
+                stage.addChild(point);
+            })
+        })
+    }
+
+</script>
+
+</html>
