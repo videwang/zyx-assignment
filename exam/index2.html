@@ -122,11 +122,12 @@ function positDisks(){
                 		message('You Win ! Press Spacebar to start a new game.');
                 		window.onkeydown = reStart;
                 		done = true;
-                	}
-                	if(roundCounter==10){
-                		message('Tied game !');
-						setTimeout(function() { messageTxt.visible = false; }, 2000);
-                	}
+                	}else {
+	                	if(roundCounter==10){
+	                		message('Tied game !');
+							setTimeout(function() { messageTxt.visible = false; }, 2000);
+	                	}
+	                }
                 	roundCounter++;
                 }
             });
@@ -156,11 +157,12 @@ function positDisks(){
                 		message('You Win ! Press Spacebar to start a new game.');
                 		window.onkeydown = reStart;
                 		done = true;
-                	}
-                	if(roundCounter==10){
-                		message('Tied game !');
-						setTimeout(function() { messageTxt.visible = false; }, 2000);
-                	}
+                	}else {
+	                	if(roundCounter==10){
+	                		message('Tied game !');
+							setTimeout(function() { messageTxt.visible = false; }, 2000);
+	                	}
+	                }
                 	roundCounter++;
                 }
             });
