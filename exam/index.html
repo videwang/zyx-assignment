@@ -39,6 +39,7 @@
     }
     function start(){
         drawGameBoard();
+        drawLine();
         getBoardPositionInfo();
         drawPoint();
         playerDisks();
@@ -141,6 +142,13 @@
                 stage.addChild(point);
             })
         })
+    }
+
+    function drawLine(){
+        var s = new createjs.Shape(); 
+        s.graphics.s("black").ss(1).mt(250,200).lt(550,500).es();
+        s.graphics.s("black").ss(1).mt(250,500).lt(550,200).es();
+        stage.addChild(s);
     }
 
 </script>
